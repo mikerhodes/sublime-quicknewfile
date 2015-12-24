@@ -44,18 +44,18 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
         # Fall back to home (TODO: does this work outside of OS X?)
         return os.path.expanduser('~') + os.sep
 
-    def on_done(self, input_string):
+    def on_done(self, current_path):
         """Called when input dialog is done (i.e., action should happen)
 
         Will open the file specified by input string, creating directories
         and files which are required to do so.
 
         """
-        if len(input_string) == 0:
+        if len(current_path) == 0:
             self.show_error("Empty input")
             return
 
-        directory, fname = os.path.split(input_string)
+        directory, fname = os.path.split(current_path)
         if os.path.exists(directory) and not os.path.isdir(directory):
             self.show_error("Directory path exists, but isn't a directory")
             return
@@ -69,12 +69,19 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
 
         self.window.open_file(os.path.join(directory, fname))
 
-    def on_edit(self, input_string):
+    def on_edit(self, current_path):
         """Called when input dialog is edited
 
-        TODO: at some point can we do folder complete here?
+        Does folder complete.
         """
-        pass
+        if current_path.endswith("\t"):
+            completed_path = self.completion(current_path.replace("\t", ""))
+            if completed_path:
+                replacement = completed_path
+            else:
+                replacement = current_path.replace('\t', '')
+            self.input_panel_view.run_command("quick_new_file_replace",
+                                              {"content": replacement})
 
     def on_cancel(self):
         """Called when input dialog is cancelled.
@@ -100,3 +107,24 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
             if ex.errno != errno.EEXIST:
                 raise
 
+    def completion(self, current_path):
+        # If we have ~, we need to expand and add the slash, otherwise
+        # just expand what we have and leave it for completion.
+        if current_path == '~':
+            current_path = os.path.expanduser(current_path) + os.sep
+        elif current_path.startswith('~'):
+            current_path = os.path.expanduser(current_path)
+
+        # Now do a simple match to find the first prefix matched subfolder
+        directory, fname = os.path.split(current_path)
+        subfolders = [o for o in os.listdir(directory) if os.path.isdir(os.path.join(directory, o))]
+        for f in subfolders:
+            if f.startswith(fname):
+                return os.path.join(directory, f)
+        return None
+
+
+class QuickNewFileReplaceCommand(sublime_plugin.TextCommand):
+
+    def run(self, edit, content):
+        self.view.replace(edit, sublime.Region(0, self.view.size()), content)
