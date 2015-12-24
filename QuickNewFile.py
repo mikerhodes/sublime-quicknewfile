@@ -33,7 +33,7 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
 
         project_folders = window.project_data()['folders']
         if project_folders:
-            return project_folders[0]['path']
+            return project_folders[0]['path'] + os.sep
 
         # This can kill ST for folders which have many subfolders (e.g., ~).
         # So we avoid it for now.
@@ -42,7 +42,7 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
         #     return folders[0] + os.sep
 
         # Fall back to home (TODO: does this work outside of OS X?)
-        return os.path.expanduser('~')
+        return os.path.expanduser('~') + os.sep
 
     def on_done(self, input_string):
         """Called when input dialog is done (i.e., action should happen)
