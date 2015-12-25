@@ -6,6 +6,13 @@ Instead of opening a blank file, it displays an input initialised with the curre
 
 ![QuickNewFile](QuickNewFile.png)
 
+## Features
+
+- Can be used to open existing or create new files.
+- Initial directory used is the directory of current active file, falling back to project root then home directory.
+- Tab-based auto-complete for directory. Hit tab multiple times to cycle results.
+- Will create missing directory in the folder tree as needed.
+
 ## Install
 
 Install by cloning this repository into your Sublime Text packages folder:
