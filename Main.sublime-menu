@@ -1,9 +1,0 @@
-[
-{
-    "id": "file",
-    "children":
-    [
-        { "command": "quick_new_file" }
-    ]
-}
-]

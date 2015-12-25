@@ -25,7 +25,11 @@ Install by cloning this repository into your Sublime Text packages folder:
 
 The default hotkey is `super-alt-n`, where `super` is the `win` or `cmd` key, depending on your platform.
 
-There is also an entry in the File menu.
+To add other hotkeys or menu items, use the command name `quick_new_file`. For example, in your keyboard map:
+
+    [
+      { "keys": ["super+alt+n"], "command": "quick_new_file" }
+    ]
 
 ## Credits
 
