@@ -24,6 +24,10 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
             self.initial_directory(),
             self.on_done, self.on_edit, self.on_cancel
         )
+        self.input_panel_view.settings().set("auto_complete_commit_on_tab",
+                                             False)
+        self.input_panel_view.settings().set("tab_completion", False)
+        self.input_panel_view.settings().set("translate_tabs_to_spaces", False)
 
     def initial_directory(self):
         """Get the directory for the currently open file, then project."""
