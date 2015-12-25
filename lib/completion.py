@@ -120,18 +120,22 @@ class CompletionStateMachine(object):
             # At minimum, return the existing content minus the tab
             return buffer_content.replace("\t", "")
 
-        # stabilise the ordering
+        # Stabilise the ordering
         candidates = sorted(candidates)
 
-        if not self.previous_completion:  # Return the first
+        # If no previous completion, return the first candidate
+        if not self.previous_completion:
             result = candidates[0]
-        else:  # figure the next candidate or loop around
-            next_completion_idx = candidates.index(self.previous_completion) + 1
-            if next_completion_idx >= len(candidates):
-                result = candidates[0]
-            else:
-                result = candidates[next_completion_idx]
+            self.previous_completion = result
+            return os.path.join(directory, result) + os.sep
 
-        self.previous_completion = result
-        return os.path.join(directory, result) + os.sep
+        # Figure the next candidate or loop around
+        next_completion_idx = candidates.index(self.previous_completion) + 1
+        if next_completion_idx < len(candidates):
+            result = candidates[next_completion_idx]
+            self.previous_completion = result
+            return os.path.join(directory, result) + os.sep
+        else:
+            self.previous_completion = None
+            return self.completion_base
 
