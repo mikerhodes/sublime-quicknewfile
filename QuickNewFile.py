@@ -3,6 +3,8 @@ import os
 import sublime
 import sublime_plugin
 
+from .lib.completion import CompletionStateMachine
+
 class QuickNewFileCommand(sublime_plugin.WindowCommand):
 
     def run(self):
@@ -11,6 +13,8 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
 
     def setup(self):
         self.view = self.window.active_view()
+        self.completion_state_machine = CompletionStateMachine()
+        self.editing = False  # used to prevent our edits changing state
 
     @property
     def input_panel_caption(self):
@@ -78,14 +82,15 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
 
         Does folder complete.
         """
-        if current_path.endswith("\t"):
-            completed_path = self.completion(current_path.replace("\t", ""))
-            if completed_path:
-                replacement = completed_path
-            else:
-                replacement = current_path.replace('\t', '')
+        if self.editing: return
+
+        self.editing = True
+        self.completion_state_machine.transition(current_path)
+        replacement = self.completion_state_machine.complete(current_path)
+        if replacement:
             self.input_panel_view.run_command("quick_new_file_replace",
                                               {"content": replacement})
+        self.editing = False
 
     def on_cancel(self):
         """Called when input dialog is cancelled.
@@ -110,22 +115,6 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
         except OSError as ex:
             if ex.errno != errno.EEXIST:
                 raise
-
-    def completion(self, current_path):
-        # If we have ~, we need to expand and add the slash, otherwise
-        # just expand what we have and leave it for completion.
-        if current_path == '~':
-            current_path = os.path.expanduser(current_path) + os.sep
-        elif current_path.startswith('~'):
-            current_path = os.path.expanduser(current_path)
-
-        # Now do a simple match to find the first prefix matched subfolder
-        directory, fname = os.path.split(current_path)
-        subfolders = [o for o in os.listdir(directory) if os.path.isdir(os.path.join(directory, o))]
-        for f in subfolders:
-            if f.startswith(fname):
-                return os.path.join(directory, f)
-        return None
 
 
 class QuickNewFileReplaceCommand(sublime_plugin.TextCommand):
