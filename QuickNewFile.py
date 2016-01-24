@@ -39,7 +39,7 @@ class QuickNewFileCommand(sublime_plugin.WindowCommand):
             directory, _ = os.path.split(self.view.file_name())
             return directory + os.sep
 
-        project_folders = window.project_data()['folders']
+        project_folders = self.window.project_data()['folders']
         if project_folders:
             return project_folders[0]['path'] + os.sep
 
