@@ -71,13 +71,11 @@ class CompletionStateMachine(object):
                 self.state = STATE_COMPLETING
                 self.completion_base = buffer_content.replace("\t", "")
                 self.previous_completion = None
-                # sublime.message_dialog("Entering COMPLETING, base: {0}".format(self.completion_base))
         elif self.state == STATE_COMPLETING:
             if not buffer_content.endswith('\t'):
                 self.state = STATE_NOT_COMPLETING
                 self.completion_base = None
                 self.previous_completion = None
-                # sublime.message_dialog("Entering NOT_COMPLETING")
 
     def complete(self, buffer_content):
         """Return a completion, or None if we're not in STATE_COMPLETING.
@@ -104,7 +102,8 @@ class CompletionStateMachine(object):
 
         # Now do a simple match to find the first prefix matched subfolder
         directory, fname = os.path.split(current_path)
-        subfolders = [o for o in os.listdir(directory) if os.path.isdir(os.path.join(directory, o))]
+        subfolders = [o for o in os.listdir(directory)
+            if os.path.isdir(os.path.join(directory, o))]
 
         # Now find the possible candidates. Getting all and putting in a list
         # allows us to loop through them using the previous_completion state
